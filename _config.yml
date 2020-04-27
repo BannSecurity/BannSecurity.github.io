@@ -1,0 +1,38 @@
+# Site settings
+title: "Bann Security"
+email: 
+description: "Security related blogs and software."
+baseurl: ""
+url: "https://bannsecurity.com/"
+title_description: "Information Security connoisseur, breaker of things, and founder of NoTeamName CTF team. This blog contains my thoughts, ramblings, and writeups."
+title_image: "https://avatars1.githubusercontent.com/u/7632864?s=460&u=cdc6710bfc6704589b5566f4f3ca9b2c37be29f5&v=4"
+google_analytics: ""
+disqus_account: 
+github_repository: https://github.com/BannSecurity/BannSecurity.github.io
+addthis_id: ra-5ea772ec45da1299
+post_limit: 5
+
+# Social usernames/URLs
+twitter_username: bannsec
+github_username:  bannsec
+instagram_username: 
+reddit_username: 
+linkedin_link: 
+google_plus_link: 
+stackoverflow_link: 
+xing_link:
+facebook_link:
+
+# Footer
+footer_left: "Copyright © 2020 Michael Bann"
+footer_right: "&lt;/&gt; on <a href=\"https://github.com/BannSecurity/BannSecurity.github.io\">Github</a> &nbsp;<i class=\"fa fa-github-alt\"></i>"
+
+# Build settings
+markdown: kramdown
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge
+
+permalink: pretty
+exclude: [vendor]
