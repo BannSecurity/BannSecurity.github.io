@@ -11,6 +11,7 @@ tags:
  - writeup
  - reverse
  - angr
+ - ghidra
 ---
 
 5-seconds was a reversing challenge that required you to identify why your flag
