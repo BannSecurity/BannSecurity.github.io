@@ -86,18 +86,18 @@ from revenge import Process, common, types
 p = Process("./pwn_constraint")
 
 # Grab the function you want to call
-func = p.memory['pwn_constraint:0x12cf']
+func = p.memory["pwn_constraint:0x12cf"]
 
-# Since this modifies in memory, allocate a string ahead of time
+# Create a string in memory so we can read it back after it's permuted
 mem = p.memory.alloc_string(types.StringUTF8("ABCDEFG"))
 
 # Run the string
 func(mem.address)
-# OUT: 70
+# 70
 
 # Read what it got permuted into
 mem.string_utf8
-# OUT: 'CEGAFBD'
+# 'CEGAFBD'
 ```
 
 You can play around with different inputs, but it seems to just scramble them.
@@ -116,6 +116,7 @@ base = 0x400000
 
 # Avoid anything that goes to Bad nom nom
 avoid = [base+0x14E9, base+0x154D] 
+
 # Find my way PAST the first check, to the point where it prompts for input
 # again
 find = base+0x158B
