@@ -30,7 +30,7 @@ reversing that stage to identify how the final flag needed to be decrypted.
 The given file is an APK (android application file). To start with, spin up an
 emulator and connect to it via [revenge][revenge]:
 
-```python
+{% highlight python %}
 from revenge import Process, common, types, devices
 
 # This will find your local android device and configure things
@@ -41,7 +41,7 @@ android.install("./andry.apk")
 
 # Launch it
 andry = android.spawn('*andry*', gated=False, load_symbols=['*andry*'])
-```
+{% endhighlight %}
 
 ![Main Screen](https://github.com/NoTeamName/CTF2020/raw/master/m0leCon/teaser/rev/andry/andry_main.png)
 
@@ -59,7 +59,7 @@ Time to dig into the code a little. The basics for looking at the code involve:
 Looking at the MainActivity, we can find the handler for our password
 validation:
 
-```java
+{% highlight java %}
 protected void onCreate(Bundle paramBundle)
 {
   super.onCreate(paramBundle);
@@ -79,12 +79,12 @@ protected void onCreate(Bundle paramBundle)
     }
   });
 }
-```
+{% endhighlight %}
 
 So we should be expecting to see "Yes!" or "No...". It's first calling
 `check_password`, so we should check there next.
 
-```java
+{% highlight java %}
 private Boolean check_password()
 {
   Object localObject1 = ((EditText)findViewById(2131165268)).getText().toString();
@@ -150,7 +150,7 @@ private Boolean check_password()
   }
   return Boolean.FALSE;
 }
-```
+{% endhighlight %}
 
 So we can see that it's breaking up our input into two character chunks,
 converting them to an integer, then calling a function with the input and
@@ -160,13 +160,13 @@ is 32, then we're good.
 Those `c1` `c2` etc params are actually called from the shared library that
 comes with this application. You can see it here:
 
-```java
+{% highlight java %}
 public native int c1(int paramInt);
 public native int c10(int paramInt);
 public native int c11(int paramInt);
 public native int c12(int paramInt);
 public native int c13(int paramInt);
-```
+{% endhighlight %}
 
 Luckily for us, we don't actually have to reverse those. Instead, so long as
 they are deterministic in what they return, we can simply call them over and
@@ -191,7 +191,7 @@ What we just did there was to actually call the function directly with our
 input. With this in mind, we can now brute force stage 1 to find the expected
 input.
 
-```python
+{% highlight python %}
 # These were extracted from the java decompiled view
 goals = [6326, 2259, 455, 1848, 275400, 745, 1714, 1076, 12645, 2120, 153664, 10371, 37453, 203640, 691092, 36288, 753, 2011, 59949, 18082, 538, 12420, 2529, 1130, 6076, 11702, 47217, 1056, 207, 11315, 2676, 261]
 
@@ -208,7 +208,7 @@ for i in range(1,33):
     flag += "{:02x}".format(find_solution("c"+str(i), goals[i-1]))
 
 assert flag == "48bb6e862e54f2a795ffc4e541caed4d0bf985de4d3d7c5df73cf960638b4bf2"
-```
+{% endhighlight %}
 
 While we know that should be correct, when we input it, the program still
 crashes... Need to take a look at the next section.
@@ -219,7 +219,7 @@ According to the decompilation, if we pass step one we should hit the call
 `DynamicLoaderService.startActionLoad`. To verify this, let's quickly hook that
 method so that [revenge][revenge] tells us if we hit it or not.
 
-```python
+{% highlight python %}
 # Grab the loader service class
 dls = andry.java.classes['com.andry.DynamicLoaderService']
 
@@ -231,11 +231,11 @@ dls.startActionLoad.implementation = "function (x) { send('hit'); return this.st
 
 # Revert your override with
 dls.startActionLoad.implementation = None
-```
+{% endhighlight %}
 
 So we can confirm this is getting hit. Here's some code for the function:
 
-```java
+{% highlight java %}
 public static void startActionLoad(Context paramContext, String paramString)
   {
     Intent localIntent = new Intent(paramContext, DynamicLoaderService.class);
@@ -250,7 +250,7 @@ public static void startActionLoad(Context paramContext, String paramString)
       handleActionFoo(paramIntent.getStringExtra("com.andry.extra.password"));
     }
   }
-```
+{% endhighlight %}
 
 Following it down to `handleActionFoo`:
 
@@ -300,12 +300,12 @@ dynamically instead.
 To do this, all we need to do is implement the `XORDecrypt` method that gets
 called with the array.
 
-```python
+{% highlight python %}
 dls = andry.java.classes['com.andry.DynamicLoaderService']
 
 # Simply echo back to us what that method was called with
 dls.XORDecrypt.implementation = "function (x, y) { send([x,y]); }" 
-```
+{% endhighlight %}
 
 The blob is the first argument and the key (which we gave it) is the second.
 Since this is apparently a basic [xor chipher][xor cipher], we can just decrypt
@@ -338,7 +338,7 @@ Our blob2 appears to be a dex file. The call after XORing this blob is to call
 Opening up the new dex file in [jdgui][jdgui], we can find the `decrypt` method
 being referenced:
 
-```java
+{% highlight java %}
 public class Inner
 {
   public static String decrypt(String paramString)
@@ -375,13 +375,13 @@ public class Inner
   
   public void keep() {}
 }
-```
+{% endhighlight %}
 
 # Decrypting Payload 2
 
 Now it's simply a matter of re-writing the java decryption method in python:
 
-```python
+{% highlight python %}
 str2 = "NUKRPFUFALOXYLJUDYRDJMXHMWQW"
 out = ""
 
@@ -390,7 +390,7 @@ for i, val in enumerate(str2):
 
 # JUSTABUNCHOFAWFULANDROIDMESS
 # ptm{JUSTABUNCHOFAWFULANDROIDMESS}
-```
+{% endhighlight %}
 
 # Downloads
 - [andry.zip](https://github.com/NoTeamName/CTF2020/raw/master/m0leCon/teaser/rev/andry/andry.apk)
